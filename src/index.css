@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Thème back-office — Mariage Lénaelle & Mathieu
+  Palette éditoriale chaleureuse (ivoire / terracotta / sauge),
+  cohérente avec le site invité (src/theme/index.ts).
+*/
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-display: "Great Vibes", "Cormorant Garamond", cursive;
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #faf6ef;        /* ivoire doux — fond de page */
+  --foreground: #3d2a1f;        /* brun très sombre — corps */
+
+  --card: #ffffff;
+  --card-foreground: #3d2a1f;
+
+  --popover: #ffffff;
+  --popover-foreground: #3d2a1f;
+
+  --primary: #c76b49;           /* terracotta — signature */
+  --primary-foreground: #fff9f2;
+
+  --secondary: #f2c9a8;         /* pêche tendre */
+  --secondary-foreground: #6e3a22;
+
+  --muted: #f1e7d8;             /* ivoire un peu plus saturé */
+  --muted-foreground: #8a6f5e;
+
+  --accent: #ead7c2;            /* sable */
+  --accent-foreground: #6e3a22;
+
+  --destructive: #b3402a;
+
+  --border: rgba(155, 74, 45, 0.16);
+  --input: rgba(155, 74, 45, 0.22);
+  --ring: #c76b49;
+
+  --chart-1: #c76b49;           /* terracotta */
+  --chart-2: #a9b49a;           /* sauge */
+  --chart-3: #e5a78f;           /* rose poudré */
+  --chart-4: #9b4a2d;           /* brique */
+  --chart-5: #f2c9a8;           /* pêche */
+
+  --sidebar: #2c1d14;           /* brun profond */
+  --sidebar-foreground: #f4ecde;
+  --sidebar-primary: #c76b49;
+  --sidebar-primary-foreground: #fff9f2;
+  --sidebar-accent: rgba(244, 236, 222, 0.08);
+  --sidebar-accent-foreground: #f4ecde;
+  --sidebar-border: rgba(244, 236, 222, 0.1);
+  --sidebar-ring: #c76b49;
+}
+
+.dark {
+  --background: #211610;
+  --foreground: #f4ecde;
+  --card: #2c1d14;
+  --card-foreground: #f4ecde;
+  --popover: #2c1d14;
+  --popover-foreground: #f4ecde;
+  --primary: #d97f5c;
+  --primary-foreground: #211610;
+  --secondary: #3a271c;
+  --secondary-foreground: #f4ecde;
+  --muted: #3a271c;
+  --muted-foreground: #c4a892;
+  --accent: #3a271c;
+  --accent-foreground: #f4ecde;
+  --destructive: #e06a52;
+  --border: rgba(244, 236, 222, 0.12);
+  --input: rgba(244, 236, 222, 0.16);
+  --ring: #d97f5c;
+  --chart-1: #d97f5c;
+  --chart-2: #a9b49a;
+  --chart-3: #e5a78f;
+  --chart-4: #c98062;
+  --chart-5: #f2c9a8;
+  --sidebar: #1a110c;
+  --sidebar-foreground: #f4ecde;
+  --sidebar-primary: #d97f5c;
+  --sidebar-primary-foreground: #211610;
+  --sidebar-accent: rgba(244, 236, 222, 0.08);
+  --sidebar-accent-foreground: #f4ecde;
+  --sidebar-border: rgba(244, 236, 222, 0.1);
+  --sidebar-ring: #d97f5c;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+}
