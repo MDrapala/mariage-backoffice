@@ -11,6 +11,7 @@ import {
 
 import { useDashboardData } from "@/hooks/useDashboardData";
 import type { Rsvp } from "@/lib/api";
+import { deviceMeta } from "@/lib/device";
 import {
   Card,
   CardContent,
@@ -50,7 +51,14 @@ function matches(rsvp: Rsvp, q: string): boolean {
 }
 
 function exportCsv(rsvps: Rsvp[]) {
-  const header = ["Prénom", "Nom", "Type", "Allergies", "Date de réponse"];
+  const header = [
+    "Prénom",
+    "Nom",
+    "Type",
+    "Allergies",
+    "Appareil",
+    "Date de réponse",
+  ];
   const lines = rsvps.flatMap((r) =>
     r.persons.map((p) =>
       [
@@ -58,6 +66,7 @@ function exportCsv(rsvps: Rsvp[]) {
         p.nom,
         p.isChild ? "Enfant" : "Adulte",
         (r.allergies ?? "").replace(/[\n;]/g, " "),
+        deviceMeta(r.device).label,
         formatDate(r.createdAt),
       ]
         .map((c) => `"${String(c).replace(/"/g, '""')}"`)
@@ -158,6 +167,7 @@ export default function Guests() {
                   <TableHead>Foyer / Invités</TableHead>
                   <TableHead className="text-center">Convives</TableHead>
                   <TableHead>Allergies</TableHead>
+                  <TableHead>Appareil</TableHead>
                   <TableHead className="text-right">Répondu le</TableHead>
                 </TableRow>
               </TableHeader>
@@ -197,6 +207,18 @@ export default function Guests() {
                       ) : (
                         <span className="text-sm text-muted-foreground">—</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const m = deviceMeta(r.device);
+                        const Icon = m.icon;
+                        return (
+                          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Icon className="size-3.5" style={{ color: m.color }} />
+                            {m.label}
+                          </span>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">
                       {formatDate(r.createdAt)}

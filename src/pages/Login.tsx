@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("admin");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -96,7 +96,7 @@ export default function Login() {
           </div>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Réservé aux mariés · {new Date().getFullYear()}
+            Réservé aux mariés &amp; témoins · {new Date().getFullYear()}
           </p>
         </div>
       </div>

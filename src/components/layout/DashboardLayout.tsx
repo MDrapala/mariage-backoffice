@@ -9,6 +9,10 @@ import {
   Menu,
   X,
   CalendarDays,
+  HeartHandshake,
+  BedDouble,
+  KeyRound,
+  ClipboardList,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +24,15 @@ import { Button } from "@/components/ui/button";
 const NAV = [
   { to: "/", label: "Vue d'ensemble", icon: LayoutDashboard, end: true },
   { to: "/invites", label: "Invités", icon: Users, end: false },
+  { to: "/suivi", label: "Suivi RSVP", icon: ClipboardList, end: false },
+  {
+    to: "/prestataires",
+    label: "Préstataires",
+    icon: HeartHandshake,
+    end: false,
+  },
+  { to: "/chambres", label: "Chambres", icon: BedDouble, end: false },
+  { to: "/attributions", label: "Attributions", icon: KeyRound, end: false },
   { to: "/informations", label: "Informations", icon: Info, end: false },
 ];
 
@@ -48,13 +61,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="mx-4 mb-2 rounded-lg border border-sidebar-border bg-sidebar-accent px-4 py-3">
         <div className="flex items-center gap-2 text-sidebar-foreground/60">
           <CalendarDays className="size-3.5" />
-          <span className="text-[11px] uppercase tracking-wider">
-            Jour J
-          </span>
+          <span className="text-[11px] uppercase tracking-wider">Jour J</span>
         </div>
-        <p className="mt-1 font-display text-3xl text-primary">
-          J−{days}
-        </p>
+        <p className="mt-1 font-display text-3xl text-primary">J−{days}</p>
         <p className="text-xs text-sidebar-foreground/55">
           {new Date(WEDDING.date).toLocaleDateString("fr-FR", {
             day: "numeric",
@@ -96,7 +105,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-sm font-medium">{username ?? "Admin"}</p>
+            <p className="truncate text-sm font-medium">
+              {username ?? "Admin"}
+            </p>
             <p className="truncate text-[11px] text-sidebar-foreground/50">
               Administrateur
             </p>
@@ -117,6 +128,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 const TITLES: Record<string, string> = {
   "/": "Vue d'ensemble",
   "/invites": "Invités",
+  "/suivi": "Suivi RSVP",
+  "/prestataires": "Préstataires",
+  "/chambres": "Chambres",
+  "/attributions": "Attributions",
   "/informations": "Informations",
 };
 
@@ -154,7 +169,11 @@ export default function DashboardLayout() {
             className="lg:hidden"
             onClick={() => setMobileOpen((v) => !v)}
           >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            {mobileOpen ? (
+              <X className="size-5" />
+            ) : (
+              <Menu className="size-5" />
+            )}
           </Button>
           <div>
             <h1 className="text-lg font-semibold leading-tight">{title}</h1>

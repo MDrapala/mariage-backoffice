@@ -7,6 +7,7 @@ import {
   RefreshCw,
   TrendingUp,
   CalendarHeart,
+  MonitorSmartphone,
 } from "lucide-react";
 import {
   Area,
@@ -22,6 +23,7 @@ import {
 } from "recharts";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { deviceMeta } from "@/lib/device";
 import { daysUntilWedding } from "@/config/wedding";
 import { StatCard } from "@/components/StatCard";
 import {
@@ -271,8 +273,9 @@ export default function Overview() {
         </Card>
       </div>
 
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       {/* Allergies */}
-      <Card>
+      <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TriangleAlert className="size-4 text-primary" />
@@ -304,6 +307,61 @@ export default function Overview() {
           )}
         </CardContent>
       </Card>
+
+      {/* Répartition par appareil */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MonitorSmartphone className="size-4 text-primary" />
+            Appareils utilisés
+          </CardTitle>
+          <CardDescription>Comment les invités ont répondu</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-full" />
+            ))
+          ) : (stats?.totalSubmissions ?? 0) === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Aucune réponse pour le moment.
+            </p>
+          ) : (
+            (["mobile", "tablet", "desktop", "inconnu"] as const)
+              .map((key) => ({
+                key,
+                count: stats?.deviceBreakdown[key] ?? 0,
+                meta: deviceMeta(key === "inconnu" ? null : key),
+              }))
+              .filter((d) => d.count > 0)
+              .map(({ key, count, meta }) => {
+                const total = stats?.totalSubmissions || 1;
+                const pct = Math.round((count / total) * 100);
+                const Icon = meta.icon;
+                return (
+                  <div key={key} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2">
+                        <Icon className="size-4" style={{ color: meta.color }} />
+                        {meta.label}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {count} · {pct}%
+                      </span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${pct}%`, backgroundColor: meta.color }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+          )}
+        </CardContent>
+      </Card>
+      </div>
     </div>
   );
 }

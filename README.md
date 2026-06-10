@@ -10,8 +10,13 @@ sauge), cohérente avec le site invité `wedding`.
 
 - **Vue d'ensemble** — cartes statistiques (invités confirmés, réponses,
   adultes/enfants, allergies), courbe cumulée des RSVP, répartition des convives
-  (donut) et liste des allergies.
-- **Invités** — table de tous les foyers et convives, recherche, export CSV.
+  (donut), liste des allergies et **répartition par appareil** (téléphone /
+  tablette / ordinateur, détecté discrètement à la réponse).
+- **Invités** — table de tous les foyers et convives (avec l'appareil utilisé),
+  recherche, export CSV.
+- **Témoins** — carnet d'adresses des prestataires (traiteur, DJ, photographe…)
+  partagé avec les témoins : ajout / modification / suppression, regroupé par
+  catégorie, avec téléphone, email, adresse, site et notes.
 - **Informations** — lieu de réception, mairie, date, code d'accès, site invité
   et contacts des mariés.
 
@@ -44,8 +49,12 @@ Identifiants par défaut (seedés par l'API) : `admin` / valeur de
 | Méthode | Route               | Description                          |
 | ------- | ------------------- | ------------------------------------ |
 | POST    | `/api/admin/login`  | Connexion admin → JWT (rôle admin)   |
-| GET     | `/api/admin/stats`  | Agrégats pour les statistiques       |
-| GET     | `/api/admin/rsvps`  | Liste des RSVP avec leurs convives   |
+| GET     | `/api/admin/stats`  | Agrégats (dont répartition appareil) |
+| GET     | `/api/admin/rsvps`  | Liste des RSVP (avec `device`)       |
+| GET     | `/api/vendors`      | Liste des prestataires               |
+| POST    | `/api/vendors`      | Crée un prestataire                  |
+| PUT     | `/api/vendors/:id`  | Met à jour un prestataire            |
+| DELETE  | `/api/vendors/:id`  | Supprime un prestataire              |
 
 ## Build
 
