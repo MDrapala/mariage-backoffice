@@ -9,6 +9,7 @@ import {
   Download,
   Users,
   CheckCircle2,
+  XCircle,
   Clock,
   Percent,
   Mail,
@@ -42,7 +43,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type FilterMode = "tous" | "repondu" | "manquant";
+type FilterMode = "tous" | "vient" | "absent" | "manquant";
 
 function exportMissingCsv(invitees: Invitee[]) {
   const missing = invitees.filter((i) => !i.responded);
@@ -81,7 +82,8 @@ export default function Followup() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return invitees.filter((i) => {
-      if (filter === "repondu" && !i.responded) return false;
+      if (filter === "vient" && i.attending !== true) return false;
+      if (filter === "absent" && i.attending !== false) return false;
       if (filter === "manquant" && i.responded) return false;
       if (!q) return true;
       return [i.firstName, i.lastName, i.household, i.email, i.phone]
@@ -115,7 +117,8 @@ export default function Followup() {
 
   const FILTERS: { key: FilterMode; label: string }[] = [
     { key: "tous", label: "Tous" },
-    { key: "repondu", label: "Ont répondu" },
+    { key: "vient", label: "Viennent" },
+    { key: "absent", label: "Ne viennent pas" },
     { key: "manquant", label: "Sans réponse" },
   ];
 
@@ -163,6 +166,11 @@ export default function Followup() {
         <StatCard
           label="Ont répondu"
           value={stats?.responded ?? 0}
+          hint={
+            stats
+              ? `${stats.attending} viennent · ${stats.declined} ne viennent pas`
+              : undefined
+          }
           icon={CheckCircle2}
           loading={loading}
           accent="sage"
@@ -280,9 +288,16 @@ export default function Followup() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {i.responded ? (
+                    {i.attending === true ? (
                       <Badge variant="sage">
-                        <CheckCircle2 className="size-3" /> Répondu
+                        <CheckCircle2 className="size-3" /> Vient
+                      </Badge>
+                    ) : i.attending === false ? (
+                      <Badge
+                        variant="outline"
+                        className="border-[#e5a78f]/50 bg-[#e5a78f]/15 text-[#b9694f]"
+                      >
+                        <XCircle className="size-3" /> Ne vient pas
                       </Badge>
                     ) : (
                       <Badge variant="outline">
@@ -320,9 +335,11 @@ export default function Followup() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Le rapprochement « a répondu » se fait par prénom + nom. Si un invité
-        apparaît à tort « en attente », vérifiez l'orthographe par rapport à sa
-        réponse RSVP.
+        Chaque réponse reçue sur le site (oui ou non) ajoute ses convives à
+        cette liste s'ils n'y figurent pas déjà ; les « oui » apparaissent aussi
+        dans l'onglet Invités. Le rapprochement se fait par prénom + nom : si un
+        invité apparaît à tort « en attente », vérifiez l'orthographe par
+        rapport à sa réponse RSVP.
       </p>
 
       <InviteeDialog

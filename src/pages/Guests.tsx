@@ -7,10 +7,12 @@ import {
   RefreshCw,
   Download,
   Inbox,
+  Trash2,
+  X,
 } from "lucide-react";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
-import type { Rsvp } from "@/lib/api";
+import { ApiError, type Rsvp, type RsvpPerson } from "@/lib/api";
 import { deviceMeta } from "@/lib/device";
 import {
   Card,
@@ -31,6 +33,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR", {
@@ -83,9 +93,19 @@ function exportCsv(rsvps: Rsvp[]) {
   URL.revokeObjectURL(url);
 }
 
+// Cible de la suppression : un foyer entier, ou un seul convive du foyer.
+interface DeleteTarget {
+  rsvp: Rsvp;
+  person?: RsvpPerson;
+}
+
 export default function Guests() {
-  const { rsvps, loading, error, reload } = useDashboardData();
+  const { rsvps, loading, error, reload, removeRsvp, removePerson } =
+    useDashboardData();
   const [query, setQuery] = useState("");
+  const [toDelete, setToDelete] = useState<DeleteTarget | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const filtered = useMemo(
     () => rsvps.filter((r) => matches(r, query)),
@@ -93,6 +113,30 @@ export default function Guests() {
   );
 
   const totalGuests = rsvps.reduce((s, r) => s + r.guestCount, 0);
+
+  function askDelete(target: DeleteTarget) {
+    setDeleteError(null);
+    setToDelete(target);
+  }
+  async function confirmDelete() {
+    if (!toDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      if (toDelete.person) {
+        await removePerson(toDelete.rsvp.id, toDelete.person.id);
+      } else {
+        await removeRsvp(toDelete.rsvp.id);
+      }
+      setToDelete(null);
+    } catch (err) {
+      setDeleteError(
+        err instanceof ApiError ? err.message : "Erreur lors de la suppression.",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -169,6 +213,9 @@ export default function Guests() {
                   <TableHead>Allergies</TableHead>
                   <TableHead>Appareil</TableHead>
                   <TableHead className="text-right">Répondu le</TableHead>
+                  <TableHead className="w-10">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -187,6 +234,17 @@ export default function Guests() {
                               <Users className="size-3.5 text-primary" />
                             )}
                             {p.prenom} {p.nom}
+                            {r.persons.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => askDelete({ rsvp: r, person: p })}
+                                title={`Retirer ${p.prenom} ${p.nom}`}
+                                aria-label={`Retirer ${p.prenom} ${p.nom}`}
+                                className="ml-0.5 rounded-sm text-muted-foreground transition-colors hover:text-destructive"
+                              >
+                                <X className="size-3.5" />
+                              </button>
+                            )}
                           </span>
                         ))}
                       </div>
@@ -223,6 +281,17 @@ export default function Guests() {
                     <TableCell className="text-right text-sm text-muted-foreground">
                       {formatDate(r.createdAt)}
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-destructive hover:text-destructive"
+                        onClick={() => askDelete({ rsvp: r })}
+                        title="Supprimer ce foyer"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -230,6 +299,42 @@ export default function Guests() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={!!toDelete}
+        onOpenChange={(o) => !o && setToDelete(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {toDelete?.person ? "Retirer ce convive ?" : "Supprimer ce foyer ?"}
+            </DialogTitle>
+            <DialogDescription>
+              {toDelete?.person
+                ? `${toDelete.person.prenom} ${toDelete.person.nom} sera retiré(e) de la réponse de son foyer et des chambres attribuées.`
+                : `La réponse de ${toDelete?.rsvp.persons
+                    .map((p) => `${p.prenom} ${p.nom}`)
+                    .join(", ")} sera supprimée, ainsi que ses attributions de chambre.`}
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setToDelete(null)}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              <Trash2 className="size-4" />{" "}
+              {toDelete?.person ? "Retirer" : "Supprimer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

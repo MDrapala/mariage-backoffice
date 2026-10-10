@@ -125,6 +125,16 @@ export function getRsvps(): Promise<Rsvp[]> {
   return request<Rsvp[]>("/api/admin/rsvps");
 }
 
+export function deleteRsvp(id: string): Promise<void> {
+  return request<void>(`/api/admin/rsvps/${id}`, { method: "DELETE" });
+}
+
+export function deleteRsvpPerson(rsvpId: string, personId: string): Promise<void> {
+  return request<void>(`/api/admin/rsvps/${rsvpId}/persons/${personId}`, {
+    method: "DELETE",
+  });
+}
+
 // ── Prestataires (carnet d'adresses des témoins) ─────────────────────────────
 
 export interface Vendor {
@@ -290,18 +300,22 @@ export interface Invitee {
   category: InviteeCategory;
   notes: string | null;
   responded: boolean;
+  /** Réponse RSVP : true = vient, false = ne vient pas, null = en attente. */
+  attending: boolean | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export type InviteeInput = Omit<
   Invitee,
-  "id" | "responded" | "createdAt" | "updatedAt"
+  "id" | "responded" | "attending" | "createdAt" | "updatedAt"
 >;
 
 export interface InviteeStats {
   total: number;
   responded: number;
+  attending: number;
+  declined: number;
   missing: number;
   responseRate: number;
 }

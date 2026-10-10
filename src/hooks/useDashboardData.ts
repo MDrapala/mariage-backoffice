@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { getStats, getRsvps, ApiError, type Stats, type Rsvp } from "@/lib/api";
+import {
+  getStats,
+  getRsvps,
+  deleteRsvp,
+  deleteRsvpPerson,
+  ApiError,
+  type Stats,
+  type Rsvp,
+} from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardData {
@@ -8,6 +16,8 @@ interface DashboardData {
   loading: boolean;
   error: string | null;
   reload: () => void;
+  removeRsvp: (id: string) => Promise<void>;
+  removePerson: (rsvpId: string, personId: string) => Promise<void>;
 }
 
 export function useDashboardData(): DashboardData {
@@ -50,5 +60,32 @@ export function useDashboardData(): DashboardData {
     };
   }, [tick, logout]);
 
-  return { stats, rsvps, loading, error, reload };
+  const removeRsvp = useCallback(async (id: string) => {
+    await deleteRsvp(id);
+    setRsvps((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+
+  // Retire un convive ; le foyer disparaît s'il n'en reste plus (comme côté API).
+  const removePerson = useCallback(async (rsvpId: string, personId: string) => {
+    await deleteRsvpPerson(rsvpId, personId);
+    setRsvps((prev) =>
+      prev.flatMap((r) => {
+        if (r.id !== rsvpId) return [r];
+        const persons = r.persons.filter((p) => p.id !== personId);
+        if (persons.length === 0) return [];
+        const childCount = persons.filter((p) => p.isChild).length;
+        return [
+          {
+            ...r,
+            persons,
+            guestCount: persons.length,
+            adultCount: persons.length - childCount,
+            childCount,
+          },
+        ];
+      }),
+    );
+  }, []);
+
+  return { stats, rsvps, loading, error, reload, removeRsvp, removePerson };
 }
